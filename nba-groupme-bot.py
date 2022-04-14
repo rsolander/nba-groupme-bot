@@ -31,7 +31,7 @@ def main():
                 # Schedule process for gametime
                 gametime_dt = datetime.strptime(game["gameTimeUTC"], "%Y-%m-%dT%H:%M:%SZ")
                 print('Scheduling pbp', game_id, gametime_dt)
-                sched.add_job(lambda: gameloop(game_id), 'cron', hour=2, minute=30, id="pbp_job")
+                sched.add_job(lambda: gameloop(game_id), 'cron', hour=2, minute=35, id="pbp_job")
 
     def sendGroupmeMsg(actionlist):
         for play in actionlist:
@@ -99,7 +99,7 @@ def main():
         return True
 
     # Every day at _, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=2, minute=29, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=2, minute=34, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
