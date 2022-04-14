@@ -9,8 +9,8 @@ prev_glob = 0
 
 def main():
     print("main started")
-    team = "NOP"
-    player = 'B. Ingram'
+    team = "ATL"
+    player = 'T. Young'
     sched = BlockingScheduler(timezone=utc)
     curtime_dt = datetime.utcnow().isoformat()
 
@@ -31,7 +31,7 @@ def main():
                 # Schedule process for gametime
                 gametime_dt = datetime.strptime(game["gameTimeUTC"], "%Y-%m-%dT%H:%M:%SZ")
                 print('Scheduling pbp', game_id, gametime_dt)
-                sched.add_job(lambda: gameloop(game_id), 'cron', hour=2, minute=35, id="pbp_job")
+                sched.add_job(lambda: gameloop(game_id), 'cron', hour=gametime_dt.hour, minute=gametime_dt.minute, id="pbp_job")
 
     def sendGroupmeMsg(actionlist):
         for play in actionlist:
@@ -48,13 +48,11 @@ def main():
             # Check if the game is over
             if play["actionType"] == "game" and play["subType"] == "end":
                 print("Game end detected. Action total: ", prev_glob)
-                sendGroupmeMsg([{"actionType":"test"}])
                 return False;
             if "playerNameI" in play:
                 if player in play["playerNameI"]:
-                    print('Action: ' + play["actionType"])
+                    print('Player action: ' + play["actionType"])
                     if (play["isFieldGoal"] and play['shotResult'] == 'Missed'):
-                        print('missed shot detected')
                         to_send.append(play)
         if len(to_send) > 0:
             sendGroupmeMsg(to_send)
@@ -73,7 +71,6 @@ def main():
     def playbyplay(game_id):
         global prev_glob
         prev_length = prev_glob
-        print('Running playbyplay', game_id)
         # Get play-by-play feed
         pbp_res = requests.get('https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_' + game_id + '.json')
         # Handle 403 when game isn't ready
@@ -85,7 +82,6 @@ def main():
         parsed_res = json.loads(pbp_res.text)
         actions = parsed_res['game']['actions']
         cur_length = len(parsed_res['game']['actions'])
-        print('Game endpoint available. ',cur_length,prev_length)
         # Only process new actions, if any
         if (cur_length - prev_length > 0):
             new_actions = actions[-(cur_length - prev_length):]
@@ -99,7 +95,7 @@ def main():
         return True
 
     # Every day at _, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=2, minute=34, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=15, minute=0, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
