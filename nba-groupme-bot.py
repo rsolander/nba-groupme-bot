@@ -50,7 +50,7 @@ def main():
     def sendGroupmeMsg(actionlist):
         global img_width
         for play in actionlist:
-            newimg_url = updateHardenPic()
+            edit_url = updateHardenPic()
             payload = {
                 "bot_id": "ebfae40129dbf09bf4de75e51b",
                 "text": "Certified bum " + player + " missed a " + play["actionType"],
@@ -61,7 +61,7 @@ def main():
                     }
                 ]
             }
-            resp = requests.post('https://api.groupme.com/v3/bots/post', json=payload)
+            resp = requests.post('https://api.groupme.com/v3/bots/post', data=json.dumps(payload))
             img_width = img_width + 200
 
     def processActions(actions):
@@ -115,7 +115,7 @@ def main():
         return True
 
     # Every day at 17:10 UTC, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=23, minute=25, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=23, minute=56, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
