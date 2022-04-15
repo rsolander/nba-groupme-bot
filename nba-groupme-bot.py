@@ -33,7 +33,7 @@ def main():
                 # Schedule process for gametime
                 gametime_dt = datetime.strptime(game["gameTimeUTC"], "%Y-%m-%dT%H:%M:%SZ")
                 print('Scheduling pbp', game_id, gametime_dt)
-                sched.add_job(lambda: gameloop(game_id), 'cron', hour=gametime_dt.hour, minute=gametime_dt.minute, id="pbp_job")
+                sched.add_job(lambda: gameloop(game_id), 'cron', hour=23, minute=59, id="pbp_job")
 
     def updateHardenPic():
         image = Image.open('harden2.jpeg')
@@ -115,7 +115,7 @@ def main():
         return True
 
     # Every day at 17:10 UTC, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=23, minute=56, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=23, minute=58, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
