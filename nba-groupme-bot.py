@@ -3,9 +3,11 @@ import json
 import time
 from pytz import utc
 from datetime import datetime
+from PIL import Image
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 prev_glob = 0
+img_width = 400
 
 def main():
     print("main started")
@@ -33,13 +35,34 @@ def main():
                 print('Scheduling pbp', game_id, gametime_dt)
                 sched.add_job(lambda: gameloop(game_id), 'cron', hour=gametime_dt.hour, minute=gametime_dt.minute, id="pbp_job")
 
+    def updateHardenPic():
+        image = Image.open('harden2.jpeg')
+        new_image = image.resize((img_width, 400))
+        new_image = new_image.crop((img_width/4,0,3*img_width/4,400))
+        new_image.save('hardenedit.jpeg')
+        data = open('./hardenedit.jpeg', 'rb').read()
+        res = requests.post(url='https://image.groupme.com/pictures',
+                    data=data,
+                    headers={'Content-Type': 'image/jpeg',
+                             'X-Access-Token': 'nlFxoVQGqzVqErEiGW3HOCFKgXJeKCqvKeffs7HI'})
+        return json.loads(res.content)['payload']['url']
+
     def sendGroupmeMsg(actionlist):
+        global img_width
         for play in actionlist:
+            newimg_url = updateHardenPic()
             payload = {
                 "bot_id": "ebfae40129dbf09bf4de75e51b",
-                "text": "Certified bum " + player + " missed a " + play["actionType"]
+                "text": "Certified bum " + player + " missed a " + play["actionType"],
+                "attachments": [
+                    {
+                        "type": "image",
+                        "url": edit_url
+                    }
+                ]
             }
             resp = requests.post('https://api.groupme.com/v3/bots/post', json=payload)
+            img_width = img_width + 200
 
     def processActions(actions):
         global prev_glob
@@ -60,13 +83,14 @@ def main():
         return True
 
     def gameloop(game_id):
-        global prev_glob
+        global prev_glob, img_width
         live = True
         while live:
             live = playbyplay(game_id)
         prev_glob = 0
         print('Game loop over.')
         sched.remove_job('pbp_job')
+        img_width = 400
 
     def playbyplay(game_id):
         global prev_glob
@@ -90,8 +114,8 @@ def main():
         time.sleep(3)
         return True
 
-    # Every day at _, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=16, minute=0, id="checkgame_job")
+    # Every day at 17:10 UTC, schedule a game stream if needed
+    sched.add_job(checkGame, 'cron', hour=23, minute=25, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
