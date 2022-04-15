@@ -77,8 +77,7 @@ def main():
         if (pbp_res.status_code == 403):
             time.sleep(3)
             return True
-        # Game is valid/started - remove the job
-        #sched.remove_job('pbp_job')
+        # Game is valid/started
         parsed_res = json.loads(pbp_res.text)
         actions = parsed_res['game']['actions']
         cur_length = len(parsed_res['game']['actions'])
@@ -87,15 +86,12 @@ def main():
             new_actions = actions[-(cur_length - prev_length):]
             if processActions(new_actions) == False:
                 return False
-        #else:
-            #print('Game isnt over but no new actions to process.')
         prev_glob = cur_length
-        # Wait 3 seconds then go again
         time.sleep(3)
         return True
 
     # Every day at _, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=15, minute=0, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=16, minute=0, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
