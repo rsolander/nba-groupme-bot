@@ -53,7 +53,7 @@ def main():
             edit_url = updateHardenPic()
             payload = {
                 "bot_id": "6d765b3c18fd6547166f92623e",
-                "text": "Harden misses a " + play["actionType"] " shot.",
+                "text": "Harden misses a " + play["actionType"] + " shot.",
                 "attachments": [
                     {
                         "type": "image",
