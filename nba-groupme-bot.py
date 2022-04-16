@@ -11,8 +11,8 @@ img_width = 400
 
 def main():
     print("main started")
-    team = "ATL"
-    player = 'T. Young'
+    team = "PHI"
+    player = 'J. Harden'
     sched = BlockingScheduler(timezone=utc)
     curtime_dt = datetime.utcnow().isoformat()
 
@@ -33,7 +33,7 @@ def main():
                 # Schedule process for gametime
                 gametime_dt = datetime.strptime(game["gameTimeUTC"], "%Y-%m-%dT%H:%M:%SZ")
                 print('Scheduling pbp', game_id, gametime_dt)
-                sched.add_job(lambda: gameloop(game_id), 'cron', hour=23, minute=59, id="pbp_job")
+                sched.add_job(lambda: gameloop(game_id), 'cron', hour=gametime_dt.hour, minute=gametime_dt.minute, id="pbp_job")
 
     def updateHardenPic():
         image = Image.open('harden2.jpeg')
@@ -52,8 +52,8 @@ def main():
         for play in actionlist:
             edit_url = updateHardenPic()
             payload = {
-                "bot_id": "ebfae40129dbf09bf4de75e51b",
-                "text": "Certified bum " + player + " missed a " + play["actionType"],
+                "bot_id": "6d765b3c18fd6547166f92623e",
+                "text": "Harden misses a " + play["actionType"] " shot.",
                 "attachments": [
                     {
                         "type": "image",
@@ -115,7 +115,7 @@ def main():
         return True
 
     # Every day at 17:10 UTC, schedule a game stream if needed
-    sched.add_job(checkGame, 'cron', hour=23, minute=58, id="checkgame_job")
+    sched.add_job(checkGame, 'cron', hour=16, minute=50, id="checkgame_job")
     cur_time = datetime.utcnow().isoformat()
     print("checkgame job scheduled, current time: " + cur_time)
 
